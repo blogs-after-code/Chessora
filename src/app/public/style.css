@@ -1,0 +1,15 @@
+:root { color-scheme: dark; --bg: #161512; --panel: #262421; --text: #eee; --accent: #769656; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+header { padding: 1.5rem 1rem 0; text-align: center; }
+header h1 { margin: 0; }
+header p { margin: .25rem 0 .75rem; opacity: .7; }
+.badge { font-size: .8rem; padding: .2rem .6rem; border-radius: 99px; background: var(--panel); }
+.badge[data-ok="true"] { color: #8fd18f; }
+.badge[data-ok="false"] { color: #ff8a80; }
+main { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; padding: 1.5rem 1rem; }
+canvas { max-width: 100%; height: auto; border-radius: 6px; }
+.controls { background: var(--panel); padding: 1rem; border-radius: 8px; width: min(100%, 480px); align-self: flex-start; display: flex; flex-direction: column; gap: .5rem; }
+input, select, button { font: inherit; padding: .5rem; border-radius: 6px; border: 1px solid #444; background: #1d1c1a; color: var(--text); }
+button { cursor: pointer; background: var(--accent); border: 0; color: #fff; }
+.error { color: #ff8a80; min-height: 1.2em; margin: 0; }

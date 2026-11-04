@@ -1,0 +1,30 @@
+# secrets
+.env
+*.pem
+*.key
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# node
+node_modules/
+dist/
+build/
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# data / models (keep out of git and zips)
+*.sqlite3
+data/raw/
+models/*.pt
+models/*.bin
+downloads/
+
+# Chessora local database
+src/app/data/

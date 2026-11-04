@@ -1,0 +1,18 @@
+{
+  "name": "chessora",
+  "version": "0.1.0",
+  "description": "Chess content creator toolkit",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0"
+  }
+}

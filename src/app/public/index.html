@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chessora</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Chessora</h1>
+    <p>Chess content toolkit for creators</p>
+    <span id="health" class="badge">Server: checking...</span>
+  </header>
+  <main>
+    <canvas id="board" width="480" height="480" aria-label="Chessboard"></canvas>
+    <section class="controls">
+      <label for="fen">Position (FEN)</label>
+      <input id="fen" type="text" spellcheck="false" autocomplete="off">
+      <p id="error" class="error" role="alert"></p>
+      <label for="theme">Board theme</label>
+      <select id="theme"></select>
+      <button id="flip" type="button">Flip board</button>
+    </section>
+  </main>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

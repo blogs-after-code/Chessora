@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign up - Chessora</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Chessora</a>
+    <nav id="nav" aria-label="Main"></nav>
+  </header>
+  <main class="card-page">
+    <form class="card" data-mode="signup" novalidate>
+      <h1>Create your account</h1>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+      <p class="error" data-error-for="email"></p>
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required>
+      <p class="error" data-error-for="username"></p>
+      <label for="password">Password (8+ characters)</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" required>
+      <p class="error" data-error-for="password"></p>
+      <p id="form-error" class="error" role="alert"></p>
+      <button type="submit">Sign up</button>
+      <p class="hint">Already have an account? <a href="/login.html">Log in</a></p>
+    </form>
+  </main>
+  <script type="module" src="/js/auth-pages.js"></script>
+</body>
+</html>

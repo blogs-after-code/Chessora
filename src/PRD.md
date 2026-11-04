@@ -66,7 +66,7 @@
 | Language / runtime | Node.js (JavaScript) | 20 or newer (human has v24.20.0) | Owner's choice; one language for the whole project | Planned |
 | Framework(s) | Express (backend); plain HTML + CSS + JS (frontend, ES modules, no bundler) | Express 4.x | Boring and well known; no build step | Planned |
 | Database / storage | SQLite file in development via `@libsql/client`; Turso (libSQL) free tier in production | latest stable | Same library works for a local file and for the free hosted DB, so free hosts with ephemeral disks do not lose user data | Planned |
-| Key libraries | `chess.js` (PGN, moves, legal checks); `stockfish` WASM build running in a Web Worker (browser); `gif.js` or `gifenc` (GIF encoding in the browser); `MediaRecorder` + canvas for WebM clips; `bcryptjs` (password hashing); `express-session` or signed JWT in an httpOnly cookie; `helmet`, `express-rate-limit`, `dotenv`, `zod` (input validation) | pinned in Phase 1 | All free and open source; heavy work (engine, encoding) runs in the user's browser so the free server stays light | Planned |
+| Key libraries | `chess.js` (PGN, moves, legal checks); `stockfish` WASM build running in a Web Worker (browser); `gif.js` or `gifenc` (GIF encoding in the browser); `MediaRecorder` + canvas for WebM clips; `bcryptjs` (password hashing); own small session layer (random token in an httpOnly SameSite=Lax cookie, only its SHA-256 hash stored in the `sessions` table; no `express-session`/JWT); `helmet`, `express-rate-limit`, `dotenv`, `zod` (input validation) | pinned in Phase 1 | All free and open source; heavy work (engine, encoding) runs in the user's browser so the free server stays light | Planned |
 | Testing | Node built-in test runner (`node --test`) for backend and pure logic; a manual browser checklist for UI | built in | No extra dependency | Planned |
 | Hosting / infra | Render free web service (Node) or similar free Node host; Turso free DB; GitHub for the code | free tiers | Zero cost; final choice confirmed in Phase 8 | Planned |
 
@@ -120,13 +120,13 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 ## 8. Deployment plan
 - Environments: local (dev, SQLite file) and production (free tier). No staging at first.
 - Where it runs and how it is packaged: one Node web service serves both the API and the static frontend (single deploy). Free host (Render free web service or similar) plus Turso free DB. Free web services sleep after idle time (first request is slow); this is documented for users.
-- Config and secrets handling: `.env` locally (git-ignored), host environment variables in production; `.env.example` is kept current (`SESSION_SECRET`, `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `PORT`, optional `LICHESS_TOKEN`).
+- Config and secrets handling: `.env` locally (git-ignored), host environment variables in production; `.env.example` is kept current (`PORT`, `APP_ENV` (set to `production` online so cookies are `Secure`), `TRUST_PROXY` (set to `1` behind the host's proxy so rate limiting sees real IPs), `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, optional `LICHESS_TOKEN`; no session secret is needed).
 - Release steps and rollback: push to GitHub, host auto-deploys from the main branch; rollback by redeploying the previous commit; DB migrations are additive and run after a backup.
 - Monitoring / logging: console logs with request IDs; `/api/health` for the host's health check; basic error log, no personal data in logs.
 
 ## 9. Non-functional requirements
 - Performance / scale: small (tens of users). Heavy work (engine, GIF/video encoding) runs in the browser. Analysis default depth is limited so a game finishes within a minute or two on a normal laptop.
-- Security and privacy: hashed passwords (bcrypt), httpOnly + SameSite session cookies, input validation with `zod`, rate limiting on auth and import routes, `helmet` headers, CSRF protection for state-changing requests, no secrets in code, minimal personal data (email and username only).
+- Security and privacy: hashed passwords (bcrypt), httpOnly + SameSite session cookies, input validation with `zod`, rate limiting on auth and import routes, `helmet` headers, CSRF protection for state-changing requests (SameSite=Lax cookie plus an Origin check), no secrets in code, minimal personal data (email and username only).
 - Legal / terms-of-service / licensing notes: Stockfish is GPLv3 (the WASM engine is used as a separate library; keep its licence and credit it). Choose chess piece sets with a clear free licence (for example the Lichess `cburnett` set, GPL/CC-BY-SA, or other CC0 sets) and credit them. Use the Lichess and Chess.com APIs within their terms (identify the app, respect rate limits, no scraping). Exports of other people's games are their games; add a short note about crediting players. Meme templates must use original or properly licensed images.
 - Platforms supported: modern desktop browsers (Chrome, Edge, Firefox) first; responsive layout so it is usable on a phone. Server: any host running Node 20 or newer.
 
@@ -147,6 +147,7 @@ Add a row every time the stack changes (also update section 4).
 | Date | Change (old -> new) | Reason | Phase |
 |---|---|---|---|
 | 2026-11-04 | Initial stack chosen: Node.js + Express, plain HTML/CSS/JS, libSQL/SQLite, browser-side Stockfish WASM | Kickoff; owner asked for HTML/CSS/JS + Node.js, no React/Next.js, free tiers only | 0 |
+| 2026-11-05 | `express-session` / JWT -> own DB-backed sessions (random token cookie, hashed in the DB); `express-rate-limit` added; `dotenv`, `helmet`, `express` confirmed in use | `express-session` has no libSQL store, and a plain `sessions` table is simpler and works on Turso; no session secret to manage | 2 |
 
 **Key decisions** (non-obvious choices, so nobody re-argues them)
 | Date | Decision | Reason | Alternatives rejected |
@@ -155,6 +156,7 @@ Add a row every time the stack changes (also update section 4).
 | 2026-11-04 | Run Stockfish and GIF/video encoding in the browser, not on the server | Free hosts have tiny CPU/RAM; keeps cost at zero | Server-side Stockfish and ffmpeg |
 | 2026-11-04 | No frontend framework | Not frontend-heavy; owner's choice | React, Next.js |
 | 2026-11-04 | libSQL client (SQLite locally, Turso in production) | Free hosts often have ephemeral disks | Plain SQLite file in production; Render free Postgres (expires) |
+| 2026-11-05 | Sessions live in the database, not in memory or a signed cookie | Free hosts restart often; server-side sessions can be revoked on logout | express-session with MemoryStore; JWT |
 | 2026-11-04 | Captions via templates built from game data, no paid AI API | Owner will not pay for anything before earning | Paid LLM APIs |
 
 ## 12. Document history
@@ -162,6 +164,7 @@ Add a row every time the stack changes (also update section 4).
 |---|---|---|
 | 2026-11-04 | PRD created from template | template |
 | 2026-11-04 | Kickoff: PRD filled in (draft, awaiting owner approval) | AI agent |
+| 2026-11-05 | Phase 2: session approach changed (sections 4, 8, 11 updated) | AI agent |
 | 2026-11-04 | PRD approved by owner; clips confirmed as animated board clips (not live video) | AI agent |
 
 ## 13. Project-type details

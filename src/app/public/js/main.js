@@ -1,5 +1,6 @@
 import { drawBoard, THEMES } from './board.js';
 import { START_FEN } from './fen.js';
+import { initNav } from './nav.js';
 
 const canvas = document.getElementById('board');
 const fenInput = document.getElementById('fen');
@@ -37,3 +38,5 @@ fetch('/api/health')
   .then((r) => r.json())
   .then((d) => { healthBox.textContent = `Server: ${d.status}`; healthBox.dataset.ok = 'true'; })
   .catch(() => { healthBox.textContent = 'Server: not reachable'; healthBox.dataset.ok = 'false'; });
+
+initNav();

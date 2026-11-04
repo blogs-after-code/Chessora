@@ -1,39 +1,40 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { createApp } from '../server/app.js';
+import { startTestApp } from './helpers.js';
 
-let server;
-let base;
-
-before(async () => {
-  server = createApp().listen(0);
-  await new Promise((r) => server.once('listening', r));
-  base = `http://127.0.0.1:${server.address().port}`;
-});
-
-after(() => server.close());
+let ctx;
+before(async () => { ctx = await startTestApp(); });
+after(() => ctx.stop());
 
 test('GET /api/health returns ok', async () => {
-  const res = await fetch(`${base}/api/health`);
+  const res = await fetch(`${ctx.base}/api/health`);
   assert.equal(res.status, 200);
-  const body = await res.json();
-  assert.equal(body.status, 'ok');
+  assert.equal((await res.json()).status, 'ok');
 });
 
 test('unknown /api route returns JSON 404', async () => {
-  const res = await fetch(`${base}/api/nope`);
+  const res = await fetch(`${ctx.base}/api/nope`);
   assert.equal(res.status, 404);
   assert.deepEqual(await res.json(), { error: 'Not found' });
 });
 
 test('home page is served', async () => {
-  const res = await fetch(`${base}/`);
+  const res = await fetch(`${ctx.base}/`);
   assert.equal(res.status, 200);
   assert.match(await res.text(), /Chessora/);
 });
 
 test('security headers are set', async () => {
-  const res = await fetch(`${base}/api/health`);
+  const res = await fetch(`${ctx.base}/api/health`);
   assert.ok(res.headers.get('x-content-type-options'));
   assert.equal(res.headers.get('x-powered-by'), null);
+});
+
+test('malformed JSON gives a 400, not a crash', async () => {
+  const res = await fetch(`${ctx.base}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{not json',
+  });
+  assert.equal(res.status, 400);
 });

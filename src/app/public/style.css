@@ -1,9 +1,6 @@
 :root { color-scheme: dark; --bg: #161512; --panel: #262421; --text: #eee; --accent: #769656; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
-header { padding: 1.5rem 1rem 0; text-align: center; }
-header h1 { margin: 0; }
-header p { margin: .25rem 0 .75rem; opacity: .7; }
 .badge { font-size: .8rem; padding: .2rem .6rem; border-radius: 99px; background: var(--panel); }
 .badge[data-ok="true"] { color: #8fd18f; }
 .badge[data-ok="false"] { color: #ff8a80; }
@@ -13,3 +10,19 @@ canvas { max-width: 100%; height: auto; border-radius: 6px; }
 input, select, button { font: inherit; padding: .5rem; border-radius: 6px; border: 1px solid #444; background: #1d1c1a; color: var(--text); }
 button { cursor: pointer; background: var(--accent); border: 0; color: #fff; }
 .error { color: #ff8a80; min-height: 1.2em; margin: 0; }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding: .75rem 1rem; background: var(--panel); }
+.brand { color: var(--text); font-weight: 700; font-size: 1.2rem; text-decoration: none; }
+#nav { display: flex; gap: 1rem; align-items: center; }
+a { color: #9fd28a; }
+.who { opacity: .7; }
+.linklike { background: none; border: 0; color: #9fd28a; padding: 0; text-decoration: underline; }
+.hero { text-align: center; padding: 1.5rem 1rem 0; }
+.hero h1 { margin: 0; }
+.hero p { margin: .25rem 0 .75rem; opacity: .7; }
+.card-page { display: flex; justify-content: center; padding: 2rem 1rem; }
+.card { background: var(--panel); padding: 1.5rem; border-radius: 8px; width: min(100%, 420px); display: flex; flex-direction: column; gap: .4rem; }
+.card h1 { margin: 0 0 .5rem; font-size: 1.4rem; }
+.card .error { font-size: .85rem; }
+.hint { opacity: .75; font-size: .9rem; margin: 0; }
+[hidden] { display: none !important; }

@@ -1,13 +1,13 @@
 # PHASES - phase-wise plan and live status
 
 ## Project state (AI keeps this current - update after every phase)
-- **Current phase:** 1 - Foundation and setup (code written; waiting for the human to run the install and tests)
+- **Current phase:** 2 - Accounts and database (code written; waiting for the human to run install, tests and the browser check)
 - **Terminal start folder:** `/run/media/DivyanshSeth/HDD/Chessora/Chessora`
 - **OS / runtime versions:** Ubuntu 24 (bash, VS Code terminal); Node 20+ required (exact version recorded after the human pastes `node --version`)
-- **How to run (NOT YET VERIFIED, the AI sandbox could not reach npm):** from `/run/media/DivyanshSeth/HDD/Chessora/Chessora`: 1) `cd src/app` 2) `npm install` 3) `npm start`, then open http://localhost:3000
-- **How to test (NOT YET VERIFIED for the server tests):** 1) `cd src/app` 2) `npm test`. The pure FEN tests (2) passed in the AI sandbox; the 4 server tests need `npm install` first.
-- **Known issues:** Express/helmet/dotenv could not be installed in the AI sandbox (no registry access), so the server and its tests are unverified. Pieces are Unicode glyphs until Phase 5.
-- **Next up:** Human runs the Phase 1 commands and reports the result; then mark Phase 1 COMPLETED and start Phase 2
+- **How to run (Phase 1 verified; Phase 2 pages need the browser check):** from `/run/media/DivyanshSeth/HDD/Chessora/Chessora`: 1) `cd src/app` 2) `npm install` 3) `npm start`, then open http://localhost:3000
+- **How to test (NOT YET VERIFIED for Phase 2):** 1) `cd src/app` 2) `npm install` 3) `npm test`. Expect `# fail 0`.
+- **Known issues:** The AI sandbox cannot reach npm, so the Phase 2 server code and its tests (auth, migrations, health) have not been run by the AI; only the SQL and validation rules were checked separately. Pieces are Unicode glyphs until Phase 5.
+- **Next up:** Human runs the Phase 2 steps and reports the result; then mark Phase 2 COMPLETED and start Phase 3
 
 ## How many phases?
 | Size | Phases | Typical examples |
@@ -27,8 +27,8 @@ Each phase must be finishable in one focused session and end in something that r
 | # | Phase | Owner | Status |
 |---|---|---|---|
 | 0 | Kickoff | Human + AI | COMPLETED (2026-11-04) |
-| 1 | Foundation and setup | AI agent | IN PROGRESS |
-| 2 | Accounts and database | AI agent | NOT STARTED |
+| 1 | Foundation and setup | AI agent | COMPLETED (2026-11-05) |
+| 2 | Accounts and database | AI agent | IN PROGRESS |
 | 3 | Game library and import | AI agent | NOT STARTED |
 | 4 | Stockfish analysis and annotations | AI agent | NOT STARTED |
 | 5 | Image and GIF export | AI agent | NOT STARTED |
@@ -59,13 +59,13 @@ Status values: `NOT STARTED` | `IN PROGRESS` | `BLOCKED` | `COMPLETED (YYYY-MM-D
 ---
 
 ### Phase 1 - Foundation and setup
-**Status:** IN PROGRESS
+**Status:** COMPLETED (2026-11-05)
 **Owner:** AI agent
 **Depends on:** Phase 0 (COMPLETED)
 **Goal:** Project skeleton that runs end-to-end: Express server serving a static page that draws a chessboard from a FEN.
 
 **Tasks**
-- [ ] Check Node/npm versions and that `npm install` works on the current drive (move the project if not)
+- [x] Check Node/npm versions and that `npm install` works on the current drive (move the project if not)
 - [x] Create folder structure inside `src/app/` (`server/`, `public/`, `tests/`) and `package.json` with pinned dependencies
 - [x] Express server with `/api/health`, security headers, and `.env` loading; update `.env.example`
 - [x] Static page that renders a board from a FEN on a canvas (piece set with a free licence)
@@ -74,28 +74,28 @@ Status values: `NOT STARTED` | `IN PROGRESS` | `BLOCKED` | `COMPLETED (YYYY-MM-D
 **Deliverables:** Runnable skeleton
 **Acceptance criteria:** Fresh clone runs with the documented commands; `/api/health` returns ok; the board shows the start position
 **Instagram content idea:** Setting up the project live and rendering the first chessboard in code
-**Completed on:** -
-**Notes / deviations:** Code is written. NOT COMPLETED because the AI sandbox could not reach the npm registry (proxy 403), so `npm install`, the server, and the 4 server tests were not run; only the 2 pure FEN tests passed. The first task (check Node/npm and that `npm install` works on the external drive) needs the human's terminal and is still open. Pieces are Unicode glyphs for now (no licence issue); the licensed SVG set arrives in Phase 5.
+**Completed on:** 2026-11-05
+**Notes / deviations:** Human verified on their machine (Node v24.20.0, npm 11.19.0, external drive works): `npm install`, `npm test` (6 pass) and `npm start` with the board and a green server badge. Fix made during verification: the test script is `node --test` (the form `node --test tests/` fails on Node 24). Pieces are Unicode glyphs until Phase 5; the licensed SVG set replaces them there.
 
 ---
 
 ### Phase 2 - Accounts and database
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Owner:** AI agent
-**Depends on:** Phase 1
+**Depends on:** Phase 1 (COMPLETED)
 **Goal:** Users can sign up, log in and log out; data stored through the libSQL client.
 
 **Tasks**
-- [ ] Database layer with migrations and a `users` table (local SQLite file, git-ignored)
-- [ ] Signup / login / logout / me endpoints with bcrypt, validation (`zod`), sessions in httpOnly cookies, rate limiting, CSRF protection
-- [ ] Landing, sign-up and log-in pages and a protected dashboard page
-- [ ] Tests for auth flows and bad input
+- [x] Database layer with migrations and a `users` table (local SQLite file, git-ignored)
+- [x] Signup / login / logout / me endpoints with bcrypt, validation (`zod`), sessions in httpOnly cookies, rate limiting, CSRF protection
+- [x] Landing, sign-up and log-in pages and a protected dashboard page
+- [x] Tests for auth flows and bad input
 
 **Deliverables:** Working accounts
 **Acceptance criteria:** A new user can sign up, log in, see the dashboard, log out; wrong passwords and duplicate emails are rejected; tests pass
 **Instagram content idea:** How a creator login system works, with no paid service
 **Completed on:** -
-**Notes / deviations:** -
+**Notes / deviations:** Code is written, NOT COMPLETED: the AI sandbox could not install npm packages, so the server tests were not run (SQL and zod rules were checked separately with node:sqlite and zod). Deviations: sessions use an own small DB-backed layer instead of express-session (see PRD section 11); CSRF protection is SameSite=Lax cookies plus an Origin check; the dashboard HTML is public but contains no data and redirects to login when `/api/auth/me` returns 401. No email verification (non-goal).
 
 ---
 

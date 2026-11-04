@@ -7,11 +7,15 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header>
-    <h1>Chessora</h1>
-    <p>Chess content toolkit for creators</p>
-    <span id="health" class="badge">Server: checking...</span>
+  <header class="top">
+    <a class="brand" href="/">Chessora</a>
+    <nav id="nav" aria-label="Main"></nav>
   </header>
+  <section class="hero">
+    <h1>Chess content toolkit for creators</h1>
+    <p>Turn your games into GIFs, blunder clips and memes.</p>
+    <span id="health" class="badge">Server: checking...</span>
+  </section>
   <main>
     <canvas id="board" width="480" height="480" aria-label="Chessboard"></canvas>
     <section class="controls">

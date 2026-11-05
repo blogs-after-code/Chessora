@@ -46,3 +46,12 @@ export function sessionCookie(res) {
   const header = res.headers.getSetCookie().find((c) => c.startsWith('chessora_sid='));
   return header ? header.split(';')[0] : null;
 }
+
+let userCounter = 0;
+/** Create a fresh account; returns { cookie, user }. */
+export async function registerUser(base) {
+  userCounter += 1;
+  const body = { email: `user${userCounter}@example.com`, username: `user_${userCounter}`, password: 'test-password-1' };
+  const { res, data } = await call(base, 'POST', '/api/auth/signup', { body });
+  return { cookie: sessionCookie(res), user: data.user };
+}

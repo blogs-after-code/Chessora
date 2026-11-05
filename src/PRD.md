@@ -11,7 +11,7 @@
 | Size (decides phase count) | Medium (8 phases, one per day) |
 | Owner | Divyansh Seth |
 | Created | 2026-11-04 |
-| Last updated | 2026-11-05 (approved; Phase 1 in progress) |
+| Last updated | 2026-11-05 (Phase 3 in progress) |
 
 ## Development environment (fill after the terminal check at Kickoff)
 - OS / shell / editor: Ubuntu, bash, VS Code terminal
@@ -89,7 +89,7 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 
 ## 6. Data and storage
 - Data sources / inputs: user-pasted or uploaded PGN; Lichess public API (`/api/games/user/{username}`, NDJSON/PGN); Chess.com published-data API (`/pub/player/{username}/games/{YYYY}/{MM}`).
-- Storage: tables `users(id, email, username, password_hash, created_at)`, `games(id, user_id, source, source_id, pgn, white, black, result, played_at, analysis_json, created_at)`, `exports(id, user_id, game_id, kind, created_at)` (metadata only; exported files are downloaded, not stored on the server). Sketch; the final schema is set in Phase 2-3.
+- Storage: tables `users`, `sessions` (Phase 2), `games(id, user_id, source, source_id, pgn, white, black, result, event, played_at, move_count, created_at; UNIQUE per user + source + source_id)` (Phase 3). `analysis_json` is added to `games` in Phase 4, and an `exports` metadata table only if needed later (exported files are downloaded, not stored on the server). `source_id` is the Lichess game id, the Chess.com game URL, or a hash of the PGN text, which is how duplicates are skipped. A pasted PGN that carries a Lichess or Chess.com link is filed under that service and id, so pasting a game you already imported counts as a duplicate. The original PGN text (comments and all) is stored; analysis marks are stripped only for parsing.
 - Backup and data-safety plan: development DB is a local file (`src/app/data/` is git-ignored); a `tools`-style backup copy of the DB file is made before any migration; production uses Turso, which keeps its own backups. Never delete user data without a backup or explicit confirmation.
 
 ## 7. API plan
@@ -102,12 +102,13 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 | POST | `/api/auth/logout` | Log out | Session |
 | GET | `/api/auth/me` | Current user | Session |
 | GET | `/api/games` | List the user's saved games | Session |
-| POST | `/api/games` | Save a game from PGN | Session |
-| GET | `/api/games/:id` | Get one game | Session |
-| PATCH | `/api/games/:id` | Save analysis / annotations | Session |
-| DELETE | `/api/games/:id` | Delete a game (with confirmation in the UI) | Session |
-| POST | `/api/import/lichess` | Import recent games for a Lichess username | Session |
-| POST | `/api/import/chesscom` | Import games for a Chess.com username/month | Session |
+| POST | `/api/games` | Save one or many games from PGN text (duplicates skipped, bad games reported; max 50 per request, 500 per user) | Session |
+| GET | `/api/games/:id` | Get one game with every position (SAN + FEN per move) for the viewer | Session |
+| PATCH | `/api/games/:id` | Save analysis / annotations (added in Phase 4) | Session |
+| DELETE | `/api/games/:id` | Delete one game (the UI asks for confirmation) | Session |
+| POST | `/api/import/lichess` | Import games for a Lichess username: the latest `max` games (1-50), or `max` games from a date range (`from` + `to`, YYYY-MM-DD, UTC, at most one year) | Session |
+| POST | `/api/import/chesscom` | Same options as the Lichess import (latest `max` games, or a `from` + `to` date range); looks back up to 3 months for "latest" | Session |
+| POST | `/api/games/bulk-delete` | Delete several of the user's games at once (`ids`, up to 500) | Session |
 
 **External APIs / services used**
 | Service | Used for | Auth method | Rate limits / cost | Fallback |
@@ -165,6 +166,7 @@ Add a row every time the stack changes (also update section 4).
 | 2026-11-04 | PRD created from template | template |
 | 2026-11-04 | Kickoff: PRD filled in (draft, awaiting owner approval) | AI agent |
 | 2026-11-05 | Phase 2: session approach changed (sections 4, 8, 11 updated) | AI agent |
+| 2026-11-05 | Phase 3: games/import API and storage details filled in (sections 6 and 7); revised after first user test (annotated PGNs, matching import options, bulk delete) | AI agent |
 | 2026-11-04 | PRD approved by owner; clips confirmed as animated board clips (not live video) | AI agent |
 
 ## 13. Project-type details

@@ -16,6 +16,7 @@ export async function api(path, { method = 'GET', body } = {}) {
     const err = new Error((data && data.error) || `Request failed (${res.status})`);
     err.status = res.status;
     err.fields = (data && data.fields) || {};
+    err.failed = (data && data.failed) || [];
     throw err;
   }
   return data;

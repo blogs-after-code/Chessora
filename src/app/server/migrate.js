@@ -24,6 +24,28 @@ export const MIGRATIONS = [
       'CREATE INDEX idx_sessions_expires ON sessions(expires_at)',
     ],
   },
+  {
+    id: 2,
+    name: 'create_games',
+    sql: [
+      `CREATE TABLE games (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+         source TEXT NOT NULL CHECK (source IN ('pgn', 'lichess', 'chesscom')),
+         source_id TEXT NOT NULL,
+         pgn TEXT NOT NULL,
+         white TEXT NOT NULL,
+         black TEXT NOT NULL,
+         result TEXT NOT NULL,
+         event TEXT NOT NULL DEFAULT '',
+         played_at TEXT,
+         move_count INTEGER NOT NULL,
+         created_at TEXT NOT NULL DEFAULT (datetime('now')),
+         UNIQUE (user_id, source, source_id)
+       )`,
+      'CREATE INDEX idx_games_user ON games(user_id, played_at)',
+    ],
+  },
 ];
 
 /**

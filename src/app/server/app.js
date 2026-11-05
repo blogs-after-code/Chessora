@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createAuth, csrfGuard } from './auth.js';
+import { createGamesRouters } from './games.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, '..', 'public');
@@ -18,6 +19,8 @@ export function createApp({
   secureCookies = process.env.APP_ENV === 'production',
   authLimit = 20,
   trustProxy = process.env.TRUST_PROXY,
+  fetchImpl = fetch,
+  importLimit = 10,
 } = {}) {
   if (!db) throw new Error('createApp needs a database (opts.db)');
 
@@ -35,6 +38,10 @@ export function createApp({
 
   app.use('/api', csrfGuard, auth.loadUser);
   app.use('/api/auth', auth.router);
+
+  const lib = createGamesRouters({ db, requireAuth: auth.requireAuth, fetchImpl, importLimit });
+  app.use('/api/games', lib.games);
+  app.use('/api/import', lib.imports);
 
   // Unknown /api routes return JSON, not HTML
   app.use('/api', (_req, res) => {

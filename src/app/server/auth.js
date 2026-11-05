@@ -40,9 +40,9 @@ function parseCookies(header = '') {
   return out;
 }
 
-const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+export const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-function validationFailed(res, error) {
+export function validationFailed(res, error) {
   const fields = {};
   for (const issue of error.issues) {
     const key = String(issue.path[0] ?? 'form');

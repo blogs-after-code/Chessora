@@ -67,7 +67,8 @@ Requires Node 20 or newer (tested target: Node 24). Start from the project folde
    ```bash
    npm start
    ```
-   Good result: the terminal prints `Database migrations applied: 1` the first time, then
+   Good result: the terminal prints `Database migrations applied: ...` when the database is new or
+   updated, then
    `Chessora running at http://localhost:3000`. The page shows a chessboard, a green "Server: ok"
    badge, and Log in / Sign up links. Your local database is `src/app/data/chessora.db` (git-ignored;
    copy it somewhere safe if you care about the accounts in it).

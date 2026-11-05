@@ -26,3 +26,49 @@ a { color: #9fd28a; }
 .card .error { font-size: .85rem; }
 .hint { opacity: .75; font-size: .9rem; margin: 0; }
 [hidden] { display: none !important; }
+
+/* Phase 3: dashboard + game viewer */
+main.wide { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem; display: block; }
+.panel { background: var(--panel); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem; }
+.panel h2 { margin: 0 0 .75rem; font-size: 1.15rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+.tabs button { background: #1d1c1a; border: 1px solid #444; }
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); }
+.tabpanel { display: flex; flex-direction: column; gap: .5rem; max-width: 560px; }
+textarea { font: inherit; font-family: ui-monospace, monospace; padding: .5rem; border-radius: 6px; border: 1px solid #444; background: #1d1c1a; color: var(--text); resize: vertical; }
+.status { min-height: 1.2em; margin: .75rem 0 0; }
+.status.error { color: #ff8a80; }
+.failures { margin: .25rem 0 0; padding-left: 1.2rem; color: #ffcc80; font-size: .9rem; }
+.games { list-style: none; margin: 0 0 .75rem; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.game { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .6rem .75rem; background: #1d1c1a; border-radius: 6px; }
+.game-text { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.game-title { font-weight: 600; }
+button.danger { background: #8e2b2b; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+.viewer { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-start; }
+.viewer canvas { flex: 0 1 480px; }
+.moves-panel { flex: 1 1 260px; min-width: 240px; }
+.buttons { display: flex; gap: .4rem; margin-bottom: .75rem; }
+.moves { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: .25rem .6rem; }
+.moves .linklike { text-decoration: none; color: var(--text); padding: .1rem .3rem; border-radius: 4px; }
+.moves .linklike.current { background: var(--accent); }
+
+/* Phase 3 revision: dashboard v2 */
+.row { display: flex; flex-wrap: wrap; gap: .75rem; align-items: flex-end; }
+.row > div { display: flex; flex-direction: column; gap: .25rem; }
+fieldset { border: 1px solid #444; border-radius: 6px; padding: .5rem .75rem; display: flex; gap: 1.25rem; flex-wrap: wrap; margin: 0; }
+legend { padding: 0 .4rem; font-size: .9rem; opacity: .8; }
+.check { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
+.importform { display: flex; flex-direction: column; gap: .5rem; max-width: 560px; }
+.filebtn { display: inline-block; padding: .5rem .9rem; border-radius: 6px; background: #1d1c1a; border: 1px solid #444; cursor: pointer; }
+.chip { display: inline-flex; gap: .6rem; align-items: center; background: #1d1c1a; border: 1px solid var(--accent); border-radius: 99px; padding: .25rem .8rem; font-size: .9rem; }
+button.secondary { background: #1d1c1a; border: 1px solid #555; }
+button.small { padding: .25rem .6rem; font-size: .85rem; }
+.toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: .75rem; }
+.toolbar input[type="search"] { flex: 1 1 200px; }
+.recent { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.pill { font-size: .75rem; padding: .15rem .55rem; border-radius: 99px; background: #444; white-space: nowrap; }
+.pill.lichess { background: #3b3b3b; }
+.pill.chesscom { background: #3f5a2a; }
+.game input[type="checkbox"], .check input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
+.game .game-text { flex: 1; }

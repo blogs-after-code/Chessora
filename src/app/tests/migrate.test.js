@@ -15,7 +15,7 @@ test('migrations apply once and are idempotent', async () => {
     assert.deepEqual(await migrate(db), []);
     const tables = await db.execute("SELECT name FROM sqlite_master WHERE type='table'");
     const names = tables.rows.map((r) => String(r.name));
-    assert.ok(names.includes('users') && names.includes('sessions'));
+    assert.ok(['users', 'sessions', 'games'].every((n) => names.includes(n)));
   } finally {
     db.close();
     fs.rmSync(dir, { recursive: true, force: true });
@@ -31,6 +31,7 @@ test('existing database file is backed up before new migrations', async () => {
     assert.equal(fs.existsSync(path.join(dir, 'backups')), false);
     await db.execute('DELETE FROM schema_migrations'); // pretend an older state
     await db.execute({ sql: 'INSERT INTO schema_migrations (id, name) VALUES (?, ?)', args: [0, 'old'] });
+    await db.execute('DROP TABLE games');
     await db.execute('DROP TABLE sessions');
     await db.execute('DROP TABLE users');
     await migrate(db, { backupFile: file });

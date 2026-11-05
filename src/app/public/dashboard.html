@@ -11,11 +11,66 @@
     <a class="brand" href="/">Chessora</a>
     <nav id="nav" aria-label="Main"></nav>
   </header>
-  <main class="card-page">
-    <section id="content" class="card" hidden>
-      <h1 id="welcome"></h1>
-      <p class="hint" id="email"></p>
-      <p>Your game library will appear here in the next phase: import from Lichess, Chess.com or paste a PGN.</p>
+  <main id="content" class="wide" hidden>
+    <h1 id="welcome"></h1>
+
+    <section class="panel" aria-labelledby="add-title">
+      <h2 id="add-title">Add games</h2>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="lichess" aria-selected="true">Lichess</button>
+        <button type="button" role="tab" data-tab="chesscom" aria-selected="false">Chess.com</button>
+        <button type="button" role="tab" data-tab="pgn" aria-selected="false">Paste / upload PGN</button>
+      </div>
+
+      <!-- the Lichess and Chess.com forms are built by dashboard.js from one template, so they always match -->
+      <div id="panel-lichess" class="tabpanel" data-tabpanel="lichess"></div>
+      <div id="panel-chesscom" class="tabpanel" data-tabpanel="chesscom" hidden></div>
+
+      <form id="form-pgn" class="tabpanel" data-tabpanel="pgn" hidden>
+        <label for="pgn-text">PGN text (one game or many)</label>
+        <textarea id="pgn-text" rows="8" spellcheck="false" placeholder="Paste a PGN here, or choose files below. Comments and analysis in the PGN are fine."></textarea>
+        <p id="pgn-count" class="hint">Nothing loaded yet.</p>
+        <div class="row">
+          <label class="filebtn">
+            Choose .pgn file(s)
+            <input id="pgn-file" type="file" accept=".pgn,.txt,text/plain" multiple hidden>
+          </label>
+          <span id="pgn-chip" class="chip" hidden>
+            <span id="pgn-chip-text"></span>
+            <button type="button" id="pgn-chip-clear" class="linklike" aria-label="Remove loaded file">Remove</button>
+          </span>
+        </div>
+        <div class="row">
+          <button type="submit" id="pgn-submit" disabled>Add to library</button>
+          <button type="button" id="pgn-clear" class="secondary">Clear</button>
+        </div>
+      </form>
+
+      <p id="status" class="status" role="status"></p>
+      <ul id="failures" class="failures"></ul>
+    </section>
+
+    <section id="recent" class="panel" hidden aria-labelledby="recent-title">
+      <h2 id="recent-title">Just added</h2>
+      <ul id="recent-list" class="recent"></ul>
+    </section>
+
+    <section class="panel" aria-labelledby="lib-title">
+      <h2 id="lib-title">Your library <span id="total" class="hint"></span></h2>
+      <div id="toolbar" class="toolbar" hidden>
+        <input id="search" type="search" placeholder="Search player or event" aria-label="Search games">
+        <select id="source-filter" aria-label="Filter by source">
+          <option value="">All sources</option>
+          <option value="lichess">Lichess</option>
+          <option value="chesscom">Chess.com</option>
+          <option value="pgn">PGN</option>
+        </select>
+        <label class="check"><input id="select-all" type="checkbox"> Select all shown</label>
+        <button id="delete-selected" type="button" class="danger" disabled>Delete selected</button>
+      </div>
+      <p id="showing" class="hint"></p>
+      <p id="empty" class="hint" hidden>No games yet. Import some above.</p>
+      <ul id="games" class="games"></ul>
     </section>
   </main>
   <script type="module" src="/js/dashboard.js"></script>

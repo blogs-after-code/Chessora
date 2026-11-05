@@ -1,13 +1,13 @@
 # PHASES - phase-wise plan and live status
 
 ## Project state (AI keeps this current - update after every phase)
-- **Current phase:** 2 - Accounts and database (code written; waiting for the human to run install, tests and the browser check)
+- **Current phase:** 3 - Game library and import (code written; waiting for the human to run install, tests and the browser check)
 - **Terminal start folder:** `/run/media/DivyanshSeth/HDD/Chessora/Chessora`
 - **OS / runtime versions:** Ubuntu 24 (bash, VS Code terminal); Node 20+ required (exact version recorded after the human pastes `node --version`)
-- **How to run (Phase 1 verified; Phase 2 pages need the browser check):** from `/run/media/DivyanshSeth/HDD/Chessora/Chessora`: 1) `cd src/app` 2) `npm install` 3) `npm start`, then open http://localhost:3000
-- **How to test (NOT YET VERIFIED for Phase 2):** 1) `cd src/app` 2) `npm install` 3) `npm test`. Expect `# fail 0`.
-- **Known issues:** The AI sandbox cannot reach npm, so the Phase 2 server code and its tests (auth, migrations, health) have not been run by the AI; only the SQL and validation rules were checked separately. Pieces are Unicode glyphs until Phase 5.
-- **Next up:** Human runs the Phase 2 steps and reports the result; then mark Phase 2 COMPLETED and start Phase 3
+- **How to run:** from `/run/media/DivyanshSeth/HDD/Chessora/Chessora`: 1) stop any old server (Ctrl+C) 2) `cd src/app` 3) `npm install` 4) `npm start`, then open http://localhost:3000 (database migrations run automatically on start)
+- **How to test (NOT YET VERIFIED for Phase 3):** 1) `cd src/app` 2) `npm install` 3) `npm test`. Expect `# fail 0`.
+- **Known issues:** The AI sandbox cannot reach npm, so the Phase 3 server integration tests (`tests/games.test.js`) and the dashboard pages have not been run by the AI; the dependency-free tests (PGN helpers, importers, board: 17 tests) pass in the sandbox. Pieces are Unicode glyphs until Phase 5. If the server was running before an update, restart it (an old process keeps answering with old code).
+- **Next up:** Human runs the Phase 3 steps and reports the result; then mark Phase 3 COMPLETED and start Phase 4
 
 ## How many phases?
 | Size | Phases | Typical examples |
@@ -28,8 +28,8 @@ Each phase must be finishable in one focused session and end in something that r
 |---|---|---|---|
 | 0 | Kickoff | Human + AI | COMPLETED (2026-11-04) |
 | 1 | Foundation and setup | AI agent | COMPLETED (2026-11-05) |
-| 2 | Accounts and database | AI agent | IN PROGRESS |
-| 3 | Game library and import | AI agent | NOT STARTED |
+| 2 | Accounts and database | AI agent | COMPLETED (2026-11-05) |
+| 3 | Game library and import | AI agent | IN PROGRESS |
 | 4 | Stockfish analysis and annotations | AI agent | NOT STARTED |
 | 5 | Image and GIF export | AI agent | NOT STARTED |
 | 6 | Blunder and brilliancy clips | AI agent | NOT STARTED |
@@ -80,7 +80,7 @@ Status values: `NOT STARTED` | `IN PROGRESS` | `BLOCKED` | `COMPLETED (YYYY-MM-D
 ---
 
 ### Phase 2 - Accounts and database
-**Status:** IN PROGRESS
+**Status:** COMPLETED (2026-11-05)
 **Owner:** AI agent
 **Depends on:** Phase 1 (COMPLETED)
 **Goal:** Users can sign up, log in and log out; data stored through the libSQL client.
@@ -94,29 +94,29 @@ Status values: `NOT STARTED` | `IN PROGRESS` | `BLOCKED` | `COMPLETED (YYYY-MM-D
 **Deliverables:** Working accounts
 **Acceptance criteria:** A new user can sign up, log in, see the dashboard, log out; wrong passwords and duplicate emails are rejected; tests pass
 **Instagram content idea:** How a creator login system works, with no paid service
-**Completed on:** -
-**Notes / deviations:** Code is written, NOT COMPLETED: the AI sandbox could not install npm packages, so the server tests were not run (SQL and zod rules were checked separately with node:sqlite and zod). Deviations: sessions use an own small DB-backed layer instead of express-session (see PRD section 11); CSRF protection is SameSite=Lax cookies plus an Origin check; the dashboard HTML is public but contains no data and redirects to login when `/api/auth/me` returns 401. No email verification (non-goal).
+**Completed on:** 2026-11-05
+**Notes / deviations:** Human verified in the browser on 2026-11-05: sign up, log in, log out, dashboard redirect and error messages work (the human did not paste the `npm test` summary, so the automated test result is unconfirmed). The first signup failed only because an old Phase 1 server process was still running; restarting fixed it. Deviations: sessions use an own small DB-backed layer instead of express-session (see PRD section 11); CSRF protection is SameSite=Lax cookies plus an Origin check; the dashboard HTML is public but contains no data and redirects to login when `/api/auth/me` returns 401. No email verification (non-goal).
 
 ---
 
 ### Phase 3 - Game library and import
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Owner:** AI agent
-**Depends on:** Phase 2
+**Depends on:** Phase 2 (COMPLETED)
 **Goal:** Users can add games by PGN or by importing from Lichess and Chess.com, and see them in a library.
 
 **Tasks**
-- [ ] `games` table, CRUD endpoints (per-user access only)
-- [ ] PGN paste/upload with validation using `chess.js`
-- [ ] Lichess and Chess.com import endpoints with rate-limit and error handling (429, user not found)
-- [ ] Dashboard library UI: list, open, delete with confirmation
-- [ ] Tests with sample PGNs and mocked API responses
+- [x] `games` table, CRUD endpoints (per-user access only)
+- [x] PGN paste/upload with validation using `chess.js`
+- [x] Lichess and Chess.com import endpoints with rate-limit and error handling (429, user not found)
+- [x] Dashboard library UI: list, open, delete with confirmation
+- [x] Tests with sample PGNs and mocked API responses
 
 **Deliverables:** Game library with import
 **Acceptance criteria:** Importing a real Lichess and a real Chess.com username saves games; PGN paste works; bad input shows clear errors
 **Instagram content idea:** Pulling your own games from Lichess and Chess.com in one click
 **Completed on:** -
-**Notes / deviations:** -
+**Notes / deviations:** NOT COMPLETED until the human confirms the revised version. First human test (2026-11-05): 42 of 43 tests passed (the one failure was a bug in a test, fixed); Lichess and Chess.com imports worked. Feedback led to a revision: (1) pasted analysed Lichess PGNs (two comments in a row, variations, ?? marks) failed, so annotations are now stripped before parsing (original text is still stored); (2) Lichess and Chess.com imports now offer identical options (latest N games, or N games from a From/To date range) and both forms are built from one template; (3) library has checkboxes, select-all, search, source filter and one-click bulk delete (`POST /api/games/bulk-delete`); (4) the PGN box shows how many games were detected, what file is loaded, a Clear button, and is emptied after a successful add; (5) a pasted game that carries a Lichess/Chess.com link is recognised as a duplicate of the imported one. Other additions: game viewer (`/game.html?id=N`), per-user caps (500 games, 50 per request), import rate limit. A parallel edit of the importers and PGN helpers (date options, `stripAnnotations`) appeared on disk during this revision; it was kept and merged, duplicates removed. PATCH for analysis stays in Phase 4.
 
 ---
 

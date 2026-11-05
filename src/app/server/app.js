@@ -2,12 +2,25 @@
 import express from 'express';
 import helmet from 'helmet';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createAuth, csrfGuard } from './auth.js';
 import { createGamesRouters } from './games.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, '..', 'public');
+const engineDir = path.join(__dirname, '..', 'node_modules', 'stockfish', 'bin');
+
+// The browser asks for fixed names (engine.js / engine.wasm); we serve the small single-threaded
+// Stockfish build from node_modules under those names, so a version bump needs no frontend change.
+function findEngineFile(ext) {
+  try {
+    const name = fs.readdirSync(engineDir).find((f) => /^stockfish-[\d.]+-lite-single\.(js|wasm)$/.test(f) && f.endsWith(ext));
+    return name ? path.join(engineDir, name) : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * @param {object} opts
@@ -27,7 +40,15 @@ export function createApp({
   const app = express();
   app.disable('x-powered-by');
   if (trustProxy) app.set('trust proxy', Number(trustProxy) || trustProxy);
-  app.use(helmet());
+  // 'wasm-unsafe-eval' lets the browser run the chess engine (WebAssembly); nothing else is loosened.
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'script-src': ["'self'", "'wasm-unsafe-eval'"],
+      },
+    },
+  }));
   app.use(express.json({ limit: '1mb' }));
 
   const auth = createAuth({ db, bcryptRounds, secureCookies, authLimit });
@@ -47,6 +68,15 @@ export function createApp({
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Not found' });
   });
+
+  for (const [file, ext, type] of [['engine.js', '.js', 'text/javascript'], ['engine.wasm', '.wasm', 'application/wasm']]) {
+    app.get(`/vendor/stockfish/${file}`, (_req, res) => {
+      const found = findEngineFile(ext);
+      if (!found) return res.status(404).type('text/plain').send('Chess engine not installed (run npm install)');
+      res.set('Cache-Control', 'public, max-age=86400');
+      return res.type(type).sendFile(found);
+    });
+  }
 
   app.use(express.static(publicDir));
 

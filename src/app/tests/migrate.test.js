@@ -16,6 +16,8 @@ test('migrations apply once and are idempotent', async () => {
     const tables = await db.execute("SELECT name FROM sqlite_master WHERE type='table'");
     const names = tables.rows.map((r) => String(r.name));
     assert.ok(['users', 'sessions', 'games'].every((n) => names.includes(n)));
+    const cols = await db.execute('PRAGMA table_info(games)');
+    assert.ok(cols.rows.some((c) => String(c.name) === 'analysis_json'), 'games.analysis_json exists');
   } finally {
     db.close();
     fs.rmSync(dir, { recursive: true, force: true });

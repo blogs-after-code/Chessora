@@ -11,7 +11,7 @@
 | Size (decides phase count) | Medium (8 phases, one per day) |
 | Owner | Divyansh Seth |
 | Created | 2026-11-04 |
-| Last updated | 2026-11-05 (Phase 3 in progress) |
+| Last updated | 2026-11-05 (Phase 3 completed, Phase 4 in progress) |
 
 ## Development environment (fill after the terminal check at Kickoff)
 - OS / shell / editor: Ubuntu, bash, VS Code terminal
@@ -66,7 +66,7 @@
 | Language / runtime | Node.js (JavaScript) | 20 or newer (human has v24.20.0) | Owner's choice; one language for the whole project | Planned |
 | Framework(s) | Express (backend); plain HTML + CSS + JS (frontend, ES modules, no bundler) | Express 4.x | Boring and well known; no build step | Planned |
 | Database / storage | SQLite file in development via `@libsql/client`; Turso (libSQL) free tier in production | latest stable | Same library works for a local file and for the free hosted DB, so free hosts with ephemeral disks do not lose user data | Planned |
-| Key libraries | `chess.js` (PGN, moves, legal checks); `stockfish` WASM build running in a Web Worker (browser); `gif.js` or `gifenc` (GIF encoding in the browser); `MediaRecorder` + canvas for WebM clips; `bcryptjs` (password hashing); own small session layer (random token in an httpOnly SameSite=Lax cookie, only its SHA-256 hash stored in the `sessions` table; no `express-session`/JWT); `helmet`, `express-rate-limit`, `dotenv`, `zod` (input validation) | pinned in Phase 1 | All free and open source; heavy work (engine, encoding) runs in the user's browser so the free server stays light | Planned |
+| Key libraries | `chess.js` (PGN, moves, legal checks); `stockfish` (npm package, pinned 19.0.1; the "lite single-threaded" WASM build, served by our own server from `node_modules` and run in a Web Worker in the browser); `gif.js` or `gifenc` (GIF encoding in the browser); `MediaRecorder` + canvas for WebM clips; `bcryptjs` (password hashing); own small session layer (random token in an httpOnly SameSite=Lax cookie, only its SHA-256 hash stored in the `sessions` table; no `express-session`/JWT); `helmet`, `express-rate-limit`, `dotenv`, `zod` (input validation) | pinned in Phase 1 | All free and open source; heavy work (engine, encoding) runs in the user's browser so the free server stays light | Planned |
 | Testing | Node built-in test runner (`node --test`) for backend and pure logic; a manual browser checklist for UI | built in | No extra dependency | Planned |
 | Hosting / infra | Render free web service (Node) or similar free Node host; Turso free DB; GitHub for the code | free tiers | Zero cost; final choice confirmed in Phase 8 | Planned |
 
@@ -89,7 +89,7 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 
 ## 6. Data and storage
 - Data sources / inputs: user-pasted or uploaded PGN; Lichess public API (`/api/games/user/{username}`, NDJSON/PGN); Chess.com published-data API (`/pub/player/{username}/games/{YYYY}/{MM}`).
-- Storage: tables `users`, `sessions` (Phase 2), `games(id, user_id, source, source_id, pgn, white, black, result, event, played_at, move_count, created_at; UNIQUE per user + source + source_id)` (Phase 3). `analysis_json` is added to `games` in Phase 4, and an `exports` metadata table only if needed later (exported files are downloaded, not stored on the server). `source_id` is the Lichess game id, the Chess.com game URL, or a hash of the PGN text, which is how duplicates are skipped. A pasted PGN that carries a Lichess or Chess.com link is filed under that service and id, so pasting a game you already imported counts as a duplicate. The original PGN text (comments and all) is stored; analysis marks are stripped only for parsing.
+- Storage: tables `users`, `sessions` (Phase 2), `games(id, user_id, source, source_id, pgn, white, black, result, event, played_at, move_count, created_at; UNIQUE per user + source + source_id)` (Phase 3). `analysis_json` (TEXT, NULL until analysed; added in Phase 4 by migration 3) holds `{version, engine, depth, startEv, moves:[{ev, best, cls, loss}]}`: `ev` is the evaluation in centipawns from White's view (a mate is stored as +-(10000 - moves to mate)), `best` the engine's preferred move (like `e2e4`), `cls` one of best/excellent/good/inaccuracy/mistake/blunder, `loss` the centipawns lost. An `exports` metadata table only if needed later (exported files are downloaded, not stored on the server). `source_id` is the Lichess game id, the Chess.com game URL, or a hash of the PGN text, which is how duplicates are skipped. A pasted PGN that carries a Lichess or Chess.com link is filed under that service and id, so pasting a game you already imported counts as a duplicate. The original PGN text (comments and all) is stored; analysis marks are stripped only for parsing.
 - Backup and data-safety plan: development DB is a local file (`src/app/data/` is git-ignored); a `tools`-style backup copy of the DB file is made before any migration; production uses Turso, which keeps its own backups. Never delete user data without a backup or explicit confirmation.
 
 ## 7. API plan
@@ -103,8 +103,9 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 | GET | `/api/auth/me` | Current user | Session |
 | GET | `/api/games` | List the user's saved games | Session |
 | POST | `/api/games` | Save one or many games from PGN text (duplicates skipped, bad games reported; max 50 per request, 500 per user) | Session |
-| GET | `/api/games/:id` | Get one game with every position (SAN + FEN per move) for the viewer | Session |
-| PATCH | `/api/games/:id` | Save analysis / annotations (added in Phase 4) | Session |
+| GET | `/api/games/:id` | Get one game with every position (SAN, engine-notation move and FEN per move) and its saved `analysis` (or null) for the viewer | Session |
+| PATCH | `/api/games/:id` | Save (or, with `{"analysis": null}`, remove) the engine analysis; the number of moves must match the game | Session |
+| GET | `/vendor/stockfish/engine.js` and `engine.wasm` | The chess engine files for the browser (from the `stockfish` npm package) | None |
 | DELETE | `/api/games/:id` | Delete one game (the UI asks for confirmation) | Session |
 | POST | `/api/import/lichess` | Import games for a Lichess username: the latest `max` games (1-50), or `max` games from a date range (`from` + `to`, YYYY-MM-DD, UTC, at most one year) | Session |
 | POST | `/api/import/chesscom` | Same options as the Lichess import (latest `max` games, or a `from` + `to` date range); looks back up to 3 months for "latest" | Session |
@@ -148,6 +149,7 @@ Add a row every time the stack changes (also update section 4).
 | Date | Change (old -> new) | Reason | Phase |
 |---|---|---|---|
 | 2026-11-04 | Initial stack chosen: Node.js + Express, plain HTML/CSS/JS, libSQL/SQLite, browser-side Stockfish WASM | Kickoff; owner asked for HTML/CSS/JS + Node.js, no React/Next.js, free tiers only | 0 |
+| 2026-11-05 | Stockfish: "WASM build" -> npm package `stockfish` 19.0.1, lite single-threaded build served from `node_modules`; `helmet` Content-Security-Policy now allows `'wasm-unsafe-eval'` for scripts | Smallest engine (about 1.7 MB) that works on any free host without cross-origin-isolation headers; WebAssembly needs that one CSP allowance | 4 |
 | 2026-11-05 | `express-session` / JWT -> own DB-backed sessions (random token cookie, hashed in the DB); `express-rate-limit` added; `dotenv`, `helmet`, `express` confirmed in use | `express-session` has no libSQL store, and a plain `sessions` table is simpler and works on Turso; no session secret to manage | 2 |
 
 **Key decisions** (non-obvious choices, so nobody re-argues them)
@@ -158,6 +160,7 @@ Add a row every time the stack changes (also update section 4).
 | 2026-11-04 | No frontend framework | Not frontend-heavy; owner's choice | React, Next.js |
 | 2026-11-04 | libSQL client (SQLite locally, Turso in production) | Free hosts often have ephemeral disks | Plain SQLite file in production; Render free Postgres (expires) |
 | 2026-11-05 | Sessions live in the database, not in memory or a signed cookie | Free hosts restart often; server-side sessions can be revoked on logout | express-session with MemoryStore; JWT |
+| 2026-11-05 | Move labels use the loss of winning chance (2 / 5 / 10 / 20 point limits), not raw centipawn loss | A 200 centipawn loss matters in an equal game but not when already 10 pawns up; avoids false "blunders" in won games | Lichess-style fixed centipawn limits |
 | 2026-11-04 | Captions via templates built from game data, no paid AI API | Owner will not pay for anything before earning | Paid LLM APIs |
 
 ## 12. Document history
@@ -167,6 +170,7 @@ Add a row every time the stack changes (also update section 4).
 | 2026-11-04 | Kickoff: PRD filled in (draft, awaiting owner approval) | AI agent |
 | 2026-11-05 | Phase 2: session approach changed (sections 4, 8, 11 updated) | AI agent |
 | 2026-11-05 | Phase 3: games/import API and storage details filled in (sections 6 and 7); revised after first user test (annotated PGNs, matching import options, bulk delete) | AI agent |
+| 2026-11-05 | Phase 4: analysis storage, PATCH endpoint, engine files route, tech stack and label rules filled in (sections 4, 6, 7, 11) | AI agent |
 | 2026-11-04 | PRD approved by owner; clips confirmed as animated board clips (not live video) | AI agent |
 
 ## 13. Project-type details

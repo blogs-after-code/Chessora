@@ -6,6 +6,7 @@ import { asyncHandler, validationFailed } from './auth.js';
 import { parseGame, PgnError } from './pgn.js';
 import { splitPgn, gameKey, detectOrigin, isoDateToMs, DAY_MS } from './pgn-utils.js';
 import { ImportError, fetchLichessGames, fetchChesscomGames } from './importers.js';
+import { patchSchema, readAnalysis } from './analysis.js';
 
 export const MAX_GAMES_PER_USER = 500;
 export const MAX_GAMES_PER_REQUEST = 50;
@@ -153,7 +154,27 @@ export function createGamesRouters({ db, requireAuth, fetchImpl = fetch, importL
       game: { ...summary(row), pgn: String(row.pgn) },
       startFen: parsed.startFen,
       positions: parsed.positions,
+      analysis: readAnalysis(row.analysis_json),
     });
+  }));
+
+  // Phase 4: save (or clear) the engine analysis of one game.
+  games.patch('/:id', asyncHandler(async (req, res) => {
+    if (!/^\d+$/.test(req.params.id)) return res.status(404).json({ error: 'Game not found' });
+    const parsed = patchSchema.safeParse(req.body ?? {});
+    if (!parsed.success) return validationFailed(res, parsed.error);
+    const id = Number(req.params.id);
+    const found = await db.execute({ sql: 'SELECT move_count FROM games WHERE id = ? AND user_id = ?', args: [id, req.user.id] });
+    if (!found.rows.length) return res.status(404).json({ error: 'Game not found' });
+    const { analysis } = parsed.data;
+    if (analysis && analysis.moves.length !== Number(found.rows[0].move_count)) {
+      return res.status(400).json({ error: 'The analysis does not match this game' });
+    }
+    await db.execute({
+      sql: 'UPDATE games SET analysis_json = ? WHERE id = ? AND user_id = ?',
+      args: [analysis ? JSON.stringify(analysis) : null, id, req.user.id],
+    });
+    return res.json({ ok: true });
   }));
 
   games.delete('/:id', asyncHandler(async (req, res) => {

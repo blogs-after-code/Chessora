@@ -9,7 +9,7 @@ export class PgnError extends Error {}
 /**
  * @param {string} rawPgn one game
  * @returns {{pgn, white, black, result, event, playedAt, moveCount, startFen, positions}}
- *   positions[i] = { san, fen } is the position AFTER move i (move 1 = index 0).
+ *   positions[i] = { san, uci, fen } is the move i and the position AFTER it (move 1 = index 0).
  * @throws {PgnError} when the text is not a playable game
  */
 export function parseGame(rawPgn) {
@@ -40,6 +40,6 @@ export function parseGame(rawPgn) {
     playedAt: pgnDateToIso(h.Date) || pgnDateToIso(h.UTCDate),
     moveCount: moves.length,
     startFen: moves[0].before,
-    positions: moves.map((m) => ({ san: m.san, fen: m.after })),
+    positions: moves.map((m) => ({ san: m.san, uci: `${m.from}${m.to}${m.promotion || ''}`, fen: m.after })),
   };
 }

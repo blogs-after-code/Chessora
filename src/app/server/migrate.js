@@ -46,6 +46,12 @@ export const MIGRATIONS = [
       'CREATE INDEX idx_games_user ON games(user_id, played_at)',
     ],
   },
+  {
+    id: 3,
+    name: 'add_games_analysis_json',
+    // Phase 4: the saved engine analysis (JSON text). NULL = not analysed yet.
+    sql: ['ALTER TABLE games ADD COLUMN analysis_json TEXT'],
+  },
 ];
 
 /**

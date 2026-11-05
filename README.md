@@ -55,7 +55,7 @@ Requires Node 20 or newer (tested target: Node 24). Start from the project folde
    ```bash
    cd src/app
    ```
-2. Install dependencies (needs internet):
+2. Install dependencies (needs internet; run it again after every update, Phase 4 added the Stockfish engine package):
    ```bash
    npm install
    ```
@@ -77,3 +77,9 @@ Requires Node 20 or newer (tested target: Node 24). Start from the project folde
    npm test
    ```
    Good result: `# fail 0` (the summary shows how many tests passed).
+
+### Analysing a game (Phase 4)
+Open a game from the library, choose a depth (12 is a good start) and press **Analyse game**. The
+chess engine runs inside your browser, so it needs no extra setup and costs nothing. Every move gets
+a label (best ... blunder), mistakes show a blue arrow with the engine's preferred move, and the
+result is saved with the game, so it opens instantly next time.

@@ -1,13 +1,13 @@
 # PHASES - phase-wise plan and live status
 
 ## Project state (AI keeps this current - update after every phase)
-- **Current phase:** 3 - Game library and import (code written; waiting for the human to run install, tests and the browser check)
+- **Current phase:** 4 - Stockfish analysis and annotations (code written and tested by the AI in a real Chromium; waiting for the human to run install, tests and the browser check on their own machine)
 - **Terminal start folder:** `/run/media/DivyanshSeth/HDD/Chessora/Chessora`
 - **OS / runtime versions:** Ubuntu 24 (bash, VS Code terminal); Node 20+ required (exact version recorded after the human pastes `node --version`)
-- **How to run:** from `/run/media/DivyanshSeth/HDD/Chessora/Chessora`: 1) stop any old server (Ctrl+C) 2) `cd src/app` 3) `npm install` 4) `npm start`, then open http://localhost:3000 (database migrations run automatically on start)
-- **How to test (NOT YET VERIFIED for Phase 3):** 1) `cd src/app` 2) `npm install` 3) `npm test`. Expect `# fail 0`.
-- **Known issues:** The AI sandbox cannot reach npm, so the Phase 3 server integration tests (`tests/games.test.js`) and the dashboard pages have not been run by the AI; the dependency-free tests (PGN helpers, importers, board: 17 tests) pass in the sandbox. Pieces are Unicode glyphs until Phase 5. If the server was running before an update, restart it (an old process keeps answering with old code).
-- **Next up:** Human runs the Phase 3 steps and reports the result; then mark Phase 3 COMPLETED and start Phase 4
+- **How to run:** from `/run/media/DivyanshSeth/HDD/Chessora/Chessora`: 1) stop any old server (Ctrl+C) 2) `cd src/app` 3) `npm install` (Phase 4 adds the `stockfish` package) 4) `npm start`, then open http://localhost:3000. Database migrations run automatically on start and make a backup copy of the database first (migration 3 adds the `analysis_json` column).
+- **How to test:** 1) `cd src/app` 2) `npm install` 3) `npm test`. Expect `# fail 0` (69 tests passed in the AI sandbox on 2026-11-05; the human's own result is not yet confirmed for Phase 4).
+- **Known issues:** The AI ran the whole Phase 4 flow (analyse, save, reload, cancel) in headless Chromium, not in Firefox or on the human's machine. `npm audit` reports one high warning for `zod` 3.x (memory use on huge arrays); the fix is a breaking upgrade to zod 4, so it is left for the Phase 8 security pass (the server already caps request bodies at 1 MB). The browser asks for `/favicon.ico`, which does not exist yet (harmless 404). The "lite" engine is weaker than full Stockfish but far stronger than any human; labels can differ a little from Lichess or Chess.com. Pieces are Unicode glyphs until Phase 5. If the server was running before an update, restart it (an old process keeps answering with old code).
+- **Next up:** Human runs the Phase 4 steps and reports the result; then mark Phase 4 COMPLETED and start Phase 5
 
 ## How many phases?
 | Size | Phases | Typical examples |
@@ -29,8 +29,8 @@ Each phase must be finishable in one focused session and end in something that r
 | 0 | Kickoff | Human + AI | COMPLETED (2026-11-04) |
 | 1 | Foundation and setup | AI agent | COMPLETED (2026-11-05) |
 | 2 | Accounts and database | AI agent | COMPLETED (2026-11-05) |
-| 3 | Game library and import | AI agent | IN PROGRESS |
-| 4 | Stockfish analysis and annotations | AI agent | NOT STARTED |
+| 3 | Game library and import | AI agent | COMPLETED (2026-11-05) |
+| 4 | Stockfish analysis and annotations | AI agent | IN PROGRESS |
 | 5 | Image and GIF export | AI agent | NOT STARTED |
 | 6 | Blunder and brilliancy clips | AI agent | NOT STARTED |
 | 7 | Meme studio and caption helper | Human + AI | NOT STARTED |
@@ -100,7 +100,7 @@ Status values: `NOT STARTED` | `IN PROGRESS` | `BLOCKED` | `COMPLETED (YYYY-MM-D
 ---
 
 ### Phase 3 - Game library and import
-**Status:** IN PROGRESS
+**Status:** COMPLETED (2026-11-05)
 **Owner:** AI agent
 **Depends on:** Phase 2 (COMPLETED)
 **Goal:** Users can add games by PGN or by importing from Lichess and Chess.com, and see them in a library.
@@ -115,29 +115,29 @@ Status values: `NOT STARTED` | `IN PROGRESS` | `BLOCKED` | `COMPLETED (YYYY-MM-D
 **Deliverables:** Game library with import
 **Acceptance criteria:** Importing a real Lichess and a real Chess.com username saves games; PGN paste works; bad input shows clear errors
 **Instagram content idea:** Pulling your own games from Lichess and Chess.com in one click
-**Completed on:** -
-**Notes / deviations:** NOT COMPLETED until the human confirms the revised version. First human test (2026-11-05): 42 of 43 tests passed (the one failure was a bug in a test, fixed); Lichess and Chess.com imports worked. Feedback led to a revision: (1) pasted analysed Lichess PGNs (two comments in a row, variations, ?? marks) failed, so annotations are now stripped before parsing (original text is still stored); (2) Lichess and Chess.com imports now offer identical options (latest N games, or N games from a From/To date range) and both forms are built from one template; (3) library has checkboxes, select-all, search, source filter and one-click bulk delete (`POST /api/games/bulk-delete`); (4) the PGN box shows how many games were detected, what file is loaded, a Clear button, and is emptied after a successful add; (5) a pasted game that carries a Lichess/Chess.com link is recognised as a duplicate of the imported one. Other additions: game viewer (`/game.html?id=N`), per-user caps (500 games, 50 per request), import rate limit. A parallel edit of the importers and PGN helpers (date options, `stripAnnotations`) appeared on disk during this revision; it was kept and merged, duplicates removed. PATCH for analysis stays in Phase 4.
+**Completed on:** 2026-11-05
+**Notes / deviations:** Human confirmed on 2026-11-05 that Phase 3 is done (revised version). First human test (2026-11-05): 42 of 43 tests passed (the one failure was a bug in a test, fixed); Lichess and Chess.com imports worked. Feedback led to a revision: (1) pasted analysed Lichess PGNs (two comments in a row, variations, ?? marks) failed, so annotations are now stripped before parsing (original text is still stored); (2) Lichess and Chess.com imports now offer identical options (latest N games, or N games from a From/To date range) and both forms are built from one template; (3) library has checkboxes, select-all, search, source filter and one-click bulk delete (`POST /api/games/bulk-delete`); (4) the PGN box shows how many games were detected, what file is loaded, a Clear button, and is emptied after a successful add; (5) a pasted game that carries a Lichess/Chess.com link is recognised as a duplicate of the imported one. Other additions: game viewer (`/game.html?id=N`), per-user caps (500 games, 50 per request), import rate limit. A parallel edit of the importers and PGN helpers (date options, `stripAnnotations`) appeared on disk during this revision; it was kept and merged, duplicates removed. PATCH for analysis stays in Phase 4.
 
 ---
 
 ### Phase 4 - Stockfish analysis and annotations
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Owner:** AI agent
-**Depends on:** Phase 3
+**Depends on:** Phase 3 (COMPLETED)
 **Goal:** Analyse a game in the browser with Stockfish WASM and annotate every move.
 
 **Tasks**
-- [ ] Game view page: board, move list, navigation (keys/buttons)
-- [ ] Stockfish WASM in a Web Worker, depth setting, progress bar, cancel
-- [ ] Move classification (best, excellent, good, inaccuracy, mistake, blunder) from centipawn loss; eval graph
-- [ ] Save analysis JSON back to the game (`PATCH /api/games/:id`)
-- [ ] Unit tests for the classification logic with fixed evaluations
+- [x] Game view page: board, move list, navigation (keys/buttons)
+- [x] Stockfish WASM in a Web Worker, depth setting, progress bar, cancel
+- [x] Move classification (best, excellent, good, inaccuracy, mistake, blunder) from centipawn loss; eval graph
+- [x] Save analysis JSON back to the game (`PATCH /api/games/:id`)
+- [x] Unit tests for the classification logic with fixed evaluations
 
 **Deliverables:** Analysed game view
 **Acceptance criteria:** A game gets analysed in the browser, with colour-coded annotations and an eval graph, and the result is saved and reloads without re-analysis
 **Instagram content idea:** Finding your worst blunder with a free engine
 **Completed on:** -
-**Notes / deviations:** -
+**Notes / deviations:** NOT COMPLETED until the human confirms on their own machine. The AI verified in headless Chromium: engine runs in a Worker, a 7-move and a 41-move game were analysed (about 1 second each at depth 8-10), saved, reloaded without re-analysis, cancel works, graph click and arrow keys work, phone-width layout works; 69 automated tests pass (52 old + 17 new); migration 3 was tried on a copy of the human's real database (1 user, 1 game kept, backup file created). Choices: engine = npm `stockfish` 19.0.1 "lite single-threaded" build, served by our server at `/vendor/stockfish/engine.js` and `engine.wasm` (no copy in the repo, no special headers); `helmet` now allows `'wasm-unsafe-eval'` for scripts. Deviation: labels use the loss of *winning chance* (percentage points) instead of raw centipawns, because 200 centipawns lost in a won game should not be called a blunder; centipawn loss is still saved and shown. Limits: 2 points = excellent, 5 = good, 10 = inaccuracy, 20 = mistake, more = blunder; the engine's own best move is always "best". Extras: last-move highlight and a blue arrow for the engine's preferred move on inaccuracies, mistakes and blunders (`board.js` got two optional settings), per-side summary table with an accuracy score, "Try saving again" when saving fails, confirmation before re-analysing. Stored shape: `{version, engine, depth, startEv, moves:[{ev, best, cls, loss}]}` with `ev` = centipawns from White's view (mates as +-(10000 - moves to mate)).
 
 ---
 

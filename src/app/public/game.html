@@ -29,6 +29,36 @@
         <ol id="moves" class="moves"></ol>
       </section>
     </div>
+
+    <section class="panel" id="analysis-panel" aria-labelledby="analysis-title">
+      <h2 id="analysis-title">Engine analysis</h2>
+      <p id="analysis-status" class="hint">Loading...</p>
+      <div class="row">
+        <div>
+          <label for="depth">Depth (higher = more accurate, slower)</label>
+          <select id="depth">
+            <option value="8">8 - quick</option>
+            <option value="10">10</option>
+            <option value="12" selected>12 - recommended</option>
+            <option value="14">14</option>
+            <option value="16">16</option>
+            <option value="18">18 - slow</option>
+          </select>
+        </div>
+        <button type="button" id="analyse">Analyse game</button>
+        <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
+        <button type="button" id="retry-save" hidden>Try saving again</button>
+      </div>
+      <progress id="progress" max="100" value="0" hidden></progress>
+      <p id="analysis-error" class="error" role="alert"></p>
+      <p class="hint">The engine is Stockfish (free, open source, GPLv3). It runs on your own computer; only the finished result is saved to your account.</p>
+      <div id="analysis-results" hidden>
+        <p id="move-note" class="move-note" aria-live="polite"></p>
+        <canvas id="graph" class="graph" width="480" height="120" aria-label="Evaluation graph. Click to jump to a move."></canvas>
+        <p class="hint">Graph: White's winning chance after each move (light area = White). Orange dot = mistake, red dot = blunder.</p>
+        <table id="summary" class="summary"></table>
+      </div>
+    </section>
   </main>
   <script type="module" src="/js/game.js"></script>
 </body>

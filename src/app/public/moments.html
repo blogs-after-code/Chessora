@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Key moments - Chessora</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Chessora</a>
+    <nav id="nav" aria-label="Main"></nav>
+  </header>
+  <main id="content" class="wide" hidden>
+    <p><a id="back" href="/dashboard.html">&larr; Back to the game</a></p>
+    <h1>Key moments and clips</h1>
+    <p id="meta" class="hint"></p>
+    <p id="error" class="error" role="alert"></p>
+
+    <section id="no-analysis" class="panel" hidden>
+      <p>This game has not been analysed yet, so there are no key moments to show.</p>
+      <p><a id="analyse-link" class="buttonlike" href="/dashboard.html">Analyse this game first</a></p>
+    </section>
+    <section id="no-moments" class="panel" hidden>
+      <p>No key moments found: no blunders, mistakes, brilliant sacrifices or great moves. A very clean game!</p>
+    </section>
+
+    <div id="maker" class="studio" hidden>
+      <section class="panel moments-panel" aria-label="Key moments">
+        <div class="field">
+          <label for="filter">Show</label>
+          <select id="filter"></select>
+        </div>
+        <ul id="moment-list" class="moment-list"></ul>
+        <p class="hint">Sorted by impact. Brilliant moves are sacrifices the engine confirms; great moves are the best reply to an opponent's error.</p>
+      </section>
+
+      <section class="panel studio-controls" aria-label="Clip settings">
+        <canvas id="preview" aria-label="Preview of the clip"></canvas>
+        <div class="field">
+          <label for="preview-ply">Preview (<span id="ply-label"></span>)</label>
+          <input type="range" id="preview-ply" min="0" max="1" value="0">
+        </div>
+        <div class="field">
+          <label for="title">Title on the clip</label>
+          <input type="text" id="title" maxlength="40" autocomplete="off">
+          <label class="check"><input type="checkbox" id="hide-title" checked> Hide the title until the key move (builds suspense)</label>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="before">Positions before</label>
+            <input type="number" id="before" min="0" max="12" value="4" style="width:5rem">
+          </div>
+          <div class="field">
+            <label for="after">Positions after</label>
+            <input type="number" id="after" min="0" max="12" value="3" style="width:5rem">
+          </div>
+          <div class="field">
+            <label for="kind">Make a</label>
+            <select id="kind">
+              <option value="video">Video (MP4 or WebM)</option>
+              <option value="gif">Animated GIF</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="aspect">Shape</label>
+            <select id="aspect">
+              <option value="9:16" selected>Tall 9:16 (Reels, Stories)</option>
+              <option value="1:1">Square 1:1 (post)</option>
+              <option value="16:9">Wide 16:9 (YouTube)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="size">Size</label>
+            <select id="size">
+              <option value="small">Small</option>
+              <option value="medium" selected>Medium</option>
+              <option value="large">Large (not for GIF)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="speed">Time per move</label>
+            <select id="speed">
+              <option value="fast">0.5 seconds</option>
+              <option value="normal" selected>1 second</option>
+              <option value="relaxed">1.5 seconds</option>
+              <option value="slow">2 seconds</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="theme">Board colours</label>
+            <select id="theme">
+              <option value="green">Green</option>
+              <option value="brown">Brown</option>
+              <option value="blue">Blue</option>
+              <option value="slate">Slate</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pieces">Pieces</label>
+            <select id="pieces"></select>
+          </div>
+          <div class="field">
+            <label for="orientation">View from</label>
+            <select id="orientation">
+              <option value="mover">The player who moved</option>
+              <option value="white">White's side</option>
+              <option value="black">Black's side</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="show-bar" checked> Show the evaluation bar (who is winning)</label>
+          <label class="check"><input type="checkbox" id="show-names" checked> Show player names</label>
+        </div>
+        <div class="field">
+          <label for="watermark">Watermark text (optional, for example your @handle)</label>
+          <input type="text" id="watermark" maxlength="40" autocomplete="off">
+        </div>
+        <div class="row">
+          <button type="button" id="make">Make clip</button>
+          <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
+        </div>
+        <progress id="progress" max="100" value="0" hidden></progress>
+        <p id="status" class="hint" aria-live="polite"></p>
+        <p id="video-note" class="hint">Video is recorded in real time. Keep this tab open and visible until it finishes.</p>
+        <div id="result" class="result" hidden></div>
+        <p class="hint">Pieces: "cburnett" by Colin M.L. Burnett (GPLv2+). GIF encoding: gifenc (MIT).</p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="/js/moments.js"></script>
+</body>
+</html>

@@ -83,3 +83,23 @@ Open a game from the library, choose a depth (12 is a good start) and press **An
 chess engine runs inside your browser, so it needs no extra setup and costs nothing. Every move gets
 a label (best ... blunder), mistakes show a blue arrow with the engine's preferred move, and the
 result is saved with the game, so it opens instantly next time.
+
+### Making images, GIFs and videos (Phase 5)
+On a game page press **Export image, GIF or video**. Pick the shape (square for posts, tall 9:16 for
+Reels and Stories, wide 16:9 for YouTube), colours, pieces, speed and an optional watermark such as
+your @handle. Everything is made in your browser and nothing is uploaded. Video is recorded in real
+time (a 30 second video takes 30 seconds), so keep the tab open and visible. Chrome, Edge and Safari
+make MP4, which Instagram accepts; Firefox makes WebM, which you need to convert to MP4 first
+(a free converter such as HandBrake works).
+
+### Key moments and clips (Phase 6)
+Analyse a game first, then press **Key moments and clips** on the game page. Chessora lists the
+blunders, mistakes, brilliant sacrifices and great moves (the best reply to an opponent's error),
+biggest first. The top one is already selected: press **Make clip** for a ready-to-post video or
+GIF with the title (for example "Blunder: Nf6??") and an evaluation bar, or change the length,
+shape, speed and title first.
+
+## Credits and licences (kept up to date as parts are added)
+- Chess engine: [Stockfish](https://stockfishchess.org/) (GPLv3), used through the `stockfish` npm package.
+- Chess pieces: "cburnett" by Colin M.L. Burnett (GPLv2+), see `src/app/public/pieces/cburnett/LICENSE.txt`.
+- GIF encoding: [gifenc](https://github.com/mattdesl/gifenc) (MIT).

@@ -1,0 +1,5 @@
+Chess piece set "cburnett"
+Author: Colin M.L. Burnett (https://en.wikipedia.org/wiki/User:Cburnett)
+Licence: GNU General Public License, version 2 or later (https://www.gnu.org/licenses/gpl-2.0.txt)
+Source: https://github.com/lichess-org/lila/tree/master/public/piece/cburnett
+Change made: where missing, width="45" height="45" was added to the root <svg> element

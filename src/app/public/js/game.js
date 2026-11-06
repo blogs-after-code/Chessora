@@ -1,6 +1,6 @@
 // Game viewer: step through the game, run Stockfish in the browser, show and save the analysis.
 import { api } from './api.js';
-import { drawBoard } from './board.js';
+import { drawBoard, loadPieces } from './board.js';
 import { initNav } from './nav.js';
 import { analyseGame, AbortError } from './engine.js';
 import { CLASSES, LABELS, MARKS, formatEval, summarize } from './classify.js';
@@ -34,6 +34,8 @@ function render() {
   });
   moveButtons.forEach((b, i) => b.classList.toggle('current', i + 1 === ply));
   if (ply > 0) moveButtons[ply - 1].scrollIntoView({ block: 'nearest' });
+  $('export-link').href = `/export.html?id=${encodeURIComponent(gameId)}&ply=${ply}`;
+  $('moments-link').href = `/moments.html?id=${encodeURIComponent(gameId)}`;
   renderNote();
   renderGraph();
 }
@@ -210,6 +212,7 @@ async function start() {
       $('analysis-status').textContent = `This game is too long to analyse (more than ${MAX_PLIES} moves).`;
     }
     renderAnalysisPanel();
+    loadPieces().then(render);
   } catch (err) {
     $('analysis-panel').hidden = true;
     $('error').textContent = err.status === 404 ? 'Game not found.' : err.message;

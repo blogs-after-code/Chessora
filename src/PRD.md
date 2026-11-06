@@ -11,7 +11,7 @@
 | Size (decides phase count) | Medium (8 phases, one per day) |
 | Owner | Divyansh Seth |
 | Created | 2026-11-04 |
-| Last updated | 2026-11-05 (Phase 3 completed, Phase 4 in progress) |
+| Last updated | 2026-11-05 (Phase 5 completed, Phase 6 in progress) |
 
 ## Development environment (fill after the terminal check at Kickoff)
 - OS / shell / editor: Ubuntu, bash, VS Code terminal
@@ -52,8 +52,8 @@
 | F3 | Paste/upload a PGN, validate it, save it to the user's library | Must | 3 |
 | F4 | Import games by username from Lichess and Chess.com | Must | 3 |
 | F5 | Stockfish analysis in the browser (WASM): evaluation per move, move classification, annotations | Must | 4 |
-| F6 | PGN or position to animated board GIF and still PNG export (browser-side) | Must | 5 |
-| F7 | Auto-find blunders and excellent moves, and export a short clip around each (GIF/WebM, browser-side) | Must | 6 |
+| F6 | PGN or position to animated board GIF, video (MP4, or WebM where the browser cannot record MP4) and still PNG export (browser-side) | Must | 5 |
+| F7 | Auto-find key moments (blunders, mistakes, brilliant sacrifices, great moves that punish an error) and export a short clip around each (GIF or video, browser-side) | Must | 6 |
 | F8 | Meme content maker (details to be provided by the owner) | Must | 7 |
 | F9 | Caption / title / script helper using templates built from game data (no paid AI) | Should | 7 |
 | F10 | Board themes, piece sets, orientation, aspect ratios (1:1, 9:16, 16:9) for Instagram/YouTube | Should | 5-6 |
@@ -66,7 +66,7 @@
 | Language / runtime | Node.js (JavaScript) | 20 or newer (human has v24.20.0) | Owner's choice; one language for the whole project | Planned |
 | Framework(s) | Express (backend); plain HTML + CSS + JS (frontend, ES modules, no bundler) | Express 4.x | Boring and well known; no build step | Planned |
 | Database / storage | SQLite file in development via `@libsql/client`; Turso (libSQL) free tier in production | latest stable | Same library works for a local file and for the free hosted DB, so free hosts with ephemeral disks do not lose user data | Planned |
-| Key libraries | `chess.js` (PGN, moves, legal checks); `stockfish` (npm package, pinned 19.0.1; the "lite single-threaded" WASM build, served by our own server from `node_modules` and run in a Web Worker in the browser); `gif.js` or `gifenc` (GIF encoding in the browser); `MediaRecorder` + canvas for WebM clips; `bcryptjs` (password hashing); own small session layer (random token in an httpOnly SameSite=Lax cookie, only its SHA-256 hash stored in the `sessions` table; no `express-session`/JWT); `helmet`, `express-rate-limit`, `dotenv`, `zod` (input validation) | pinned in Phase 1 | All free and open source; heavy work (engine, encoding) runs in the user's browser so the free server stays light | Planned |
+| Key libraries | `chess.js` (PGN, moves, legal checks); `stockfish` (npm package, pinned 19.0.1; the "lite single-threaded" WASM build, served by our own server from `node_modules` and run in a Web Worker in the browser); `gifenc` (npm, pinned 1.0.3, MIT; GIF encoding in the browser, served by our own server from `node_modules`); `MediaRecorder` + canvas for video export (MP4 where the browser can record it, otherwise WebM); the `cburnett` SVG chess pieces (GPLv2+, kept in `public/pieces/cburnett/` with their licence file); `bcryptjs` (password hashing); own small session layer (random token in an httpOnly SameSite=Lax cookie, only its SHA-256 hash stored in the `sessions` table; no `express-session`/JWT); `helmet`, `express-rate-limit`, `dotenv`, `zod` (input validation) | pinned in Phase 1 | All free and open source; heavy work (engine, encoding) runs in the user's browser so the free server stays light | Planned |
 | Testing | Node built-in test runner (`node --test`) for backend and pure logic; a manual browser checklist for UI | built in | No extra dependency | Planned |
 | Hosting / infra | Render free web service (Node) or similar free Node host; Turso free DB; GitHub for the code | free tiers | Zero cost; final choice confirmed in Phase 8 | Planned |
 
@@ -106,6 +106,7 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 | GET | `/api/games/:id` | Get one game with every position (SAN, engine-notation move and FEN per move) and its saved `analysis` (or null) for the viewer | Session |
 | PATCH | `/api/games/:id` | Save (or, with `{"analysis": null}`, remove) the engine analysis; the number of moves must match the game | Session |
 | GET | `/vendor/stockfish/engine.js` and `engine.wasm` | The chess engine files for the browser (from the `stockfish` npm package) | None |
+| GET | `/vendor/gifenc/gifenc.esm.js` | The GIF encoder library for the export studio (from the `gifenc` npm package) | None |
 | DELETE | `/api/games/:id` | Delete one game (the UI asks for confirmation) | Session |
 | POST | `/api/import/lichess` | Import games for a Lichess username: the latest `max` games (1-50), or `max` games from a date range (`from` + `to`, YYYY-MM-DD, UTC, at most one year) | Session |
 | POST | `/api/import/chesscom` | Same options as the Lichess import (latest `max` games, or a `from` + `to` date range); looks back up to 3 months for "latest" | Session |
@@ -129,7 +130,7 @@ Browser (HTML/CSS/JS)                         Node.js + Express server          
 ## 9. Non-functional requirements
 - Performance / scale: small (tens of users). Heavy work (engine, GIF/video encoding) runs in the browser. Analysis default depth is limited so a game finishes within a minute or two on a normal laptop.
 - Security and privacy: hashed passwords (bcrypt), httpOnly + SameSite session cookies, input validation with `zod`, rate limiting on auth and import routes, `helmet` headers, CSRF protection for state-changing requests (SameSite=Lax cookie plus an Origin check), no secrets in code, minimal personal data (email and username only).
-- Legal / terms-of-service / licensing notes: Stockfish is GPLv3 (the WASM engine is used as a separate library; keep its licence and credit it). Choose chess piece sets with a clear free licence (for example the Lichess `cburnett` set, GPL/CC-BY-SA, or other CC0 sets) and credit them. Use the Lichess and Chess.com APIs within their terms (identify the app, respect rate limits, no scraping). Exports of other people's games are their games; add a short note about crediting players. Meme templates must use original or properly licensed images.
+- Legal / terms-of-service / licensing notes: Stockfish is GPLv3 (the WASM engine is used as a separate library; keep its licence and credit it). Chess pieces: the Lichess `cburnett` set by Colin M.L. Burnett (GPLv2+) is bundled; the credit is shown on the export page and in the README, and its licence file sits next to the images. Any further piece set needs a clear free licence first. Use the Lichess and Chess.com APIs within their terms (identify the app, respect rate limits, no scraping). Exports of other people's games are their games; add a short note about crediting players. Meme templates must use original or properly licensed images.
 - Platforms supported: modern desktop browsers (Chrome, Edge, Firefox) first; responsive layout so it is usable on a phone. Server: any host running Node 20 or newer.
 
 ## 10. Risks and open questions
@@ -149,6 +150,8 @@ Add a row every time the stack changes (also update section 4).
 | Date | Change (old -> new) | Reason | Phase |
 |---|---|---|---|
 | 2026-11-04 | Initial stack chosen: Node.js + Express, plain HTML/CSS/JS, libSQL/SQLite, browser-side Stockfish WASM | Kickoff; owner asked for HTML/CSS/JS + Node.js, no React/Next.js, free tiers only | 0 |
+| 2026-11-05 | Key moments: "excellent moves" -> brilliant (a sacrifice of at least 2 points of material that the engine rates best or excellent, mover not worse afterwards) and great (best move right after an opponent's mistake or blunder); ranked by a 0-100 impact score | The saved analysis keeps only the engine's single best line, so true "only move" brilliancies cannot be detected; these rules work from data we already store and need no extra engine time | Re-analysing with several engine lines (slower, bigger saved data) | 6 |
+| 2026-11-05 | GIF library -> `gifenc` 1.0.3 (not `gif.js`); video export uses `MediaRecorder` and is MP4 first, WebM as the fallback; pieces = `cburnett` SVGs; `helmet` also allows `blob:` for images and media so the studio can preview its result | `gifenc` is tiny, fast and needs no worker files; MP4 is what Instagram accepts (Chrome, Edge and Safari can record it, Firefox only WebM); blob previews let people check the file before downloading | `gif.js`; WebCodecs + MP4 muxer (more code, patchy support) | 5 |
 | 2026-11-05 | Stockfish: "WASM build" -> npm package `stockfish` 19.0.1, lite single-threaded build served from `node_modules`; `helmet` Content-Security-Policy now allows `'wasm-unsafe-eval'` for scripts | Smallest engine (about 1.7 MB) that works on any free host without cross-origin-isolation headers; WebAssembly needs that one CSP allowance | 4 |
 | 2026-11-05 | `express-session` / JWT -> own DB-backed sessions (random token cookie, hashed in the DB); `express-rate-limit` added; `dotenv`, `helmet`, `express` confirmed in use | `express-session` has no libSQL store, and a plain `sessions` table is simpler and works on Turso; no session secret to manage | 2 |
 
@@ -170,6 +173,8 @@ Add a row every time the stack changes (also update section 4).
 | 2026-11-04 | Kickoff: PRD filled in (draft, awaiting owner approval) | AI agent |
 | 2026-11-05 | Phase 2: session approach changed (sections 4, 8, 11 updated) | AI agent |
 | 2026-11-05 | Phase 3: games/import API and storage details filled in (sections 6 and 7); revised after first user test (annotated PGNs, matching import options, bulk delete) | AI agent |
+| 2026-11-05 | Phase 6: key moments page and clip maker, moment rules and impact score (sections 2 and 11) | AI agent |
+| 2026-11-05 | Phase 5: export studio (PNG, GIF, video), piece images, export limits, tech stack and licence notes filled in (sections 2, 4, 7, 10, 11) | AI agent |
 | 2026-11-05 | Phase 4: analysis storage, PATCH endpoint, engine files route, tech stack and label rules filled in (sections 4, 6, 7, 11) | AI agent |
 | 2026-11-04 | PRD approved by owner; clips confirmed as animated board clips (not live video) | AI agent |
 

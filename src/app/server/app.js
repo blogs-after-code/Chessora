@@ -40,12 +40,16 @@ export function createApp({
   const app = express();
   app.disable('x-powered-by');
   if (trustProxy) app.set('trust proxy', Number(trustProxy) || trustProxy);
-  // 'wasm-unsafe-eval' lets the browser run the chess engine (WebAssembly); nothing else is loosened.
+  // 'wasm-unsafe-eval' lets the browser run the chess engine (WebAssembly); blob: lets the export studio
+  // preview what it just made. Nothing else is loosened.
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         'script-src': ["'self'", "'wasm-unsafe-eval'"],
+        // the export studio shows the finished GIF/PNG/video from an in-memory blob: address
+        'img-src': ["'self'", 'data:', 'blob:'],
+        'media-src': ["'self'", 'blob:'],
       },
     },
   }));
@@ -67,6 +71,14 @@ export function createApp({
   // Unknown /api routes return JSON, not HTML
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Not found' });
+  });
+
+  // GIF encoder library (small, MIT licence) for the export studio, served from node_modules too.
+  app.get('/vendor/gifenc/gifenc.esm.js', (_req, res) => {
+    const file = path.join(__dirname, '..', 'node_modules', 'gifenc', 'dist', 'gifenc.esm.js');
+    if (!fs.existsSync(file)) return res.status(404).type('text/plain').send('GIF library not installed (run npm install)');
+    res.set('Cache-Control', 'public, max-age=86400');
+    return res.type('text/javascript').sendFile(file);
   });
 
   for (const [file, ext, type] of [['engine.js', '.js', 'text/javascript'], ['engine.wasm', '.wasm', 'application/wasm']]) {

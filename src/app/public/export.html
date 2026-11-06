@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Export - Chessora</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Chessora</a>
+    <nav id="nav" aria-label="Main"></nav>
+  </header>
+  <main id="content" class="wide" hidden>
+    <p><a id="back" href="/dashboard.html">&larr; Back to the game</a></p>
+    <h1>Export image, GIF or video</h1>
+    <p id="meta" class="hint"></p>
+    <p id="error" class="error" role="alert"></p>
+
+    <div class="studio">
+      <section class="panel studio-controls" aria-label="Export settings">
+        <div class="field">
+          <label for="kind">What to make</label>
+          <select id="kind">
+            <option value="png">Image (PNG) of one position</option>
+            <option value="gif">Animated GIF</option>
+            <option value="video">Video (MP4 or WebM)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="preview-ply">Position shown (<span id="ply-label"></span>)</label>
+          <input type="range" id="preview-ply" min="0" max="0" value="0">
+        </div>
+        <div id="range-fields" class="field">
+          <label>Animation range (0 = start position, 12 = after move 12)</label>
+          <div class="row">
+            <input type="number" id="from" min="0" value="0" aria-label="Start position" style="width:5.5rem">
+            <button type="button" id="set-from" class="secondary small">Start here</button>
+            <input type="number" id="to" min="1" value="1" aria-label="End position" style="width:5.5rem">
+            <button type="button" id="set-to" class="secondary small">End here</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="aspect">Shape</label>
+            <select id="aspect">
+              <option value="1:1">Square 1:1 (post)</option>
+              <option value="9:16">Tall 9:16 (Reels, Stories)</option>
+              <option value="16:9">Wide 16:9 (YouTube)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="size">Size</label>
+            <select id="size">
+              <option value="small">Small</option>
+              <option value="medium" selected>Medium</option>
+              <option value="large">Large (not for GIF)</option>
+            </select>
+          </div>
+          <div id="speed-field" class="field">
+            <label for="speed">Time per move</label>
+            <select id="speed">
+              <option value="fast">0.5 seconds</option>
+              <option value="normal" selected>1 second</option>
+              <option value="relaxed">1.5 seconds</option>
+              <option value="slow">2 seconds</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="theme">Board colours</label>
+            <select id="theme">
+              <option value="green">Green</option>
+              <option value="brown">Brown</option>
+              <option value="blue">Blue</option>
+              <option value="slate">Slate</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pieces">Pieces</label>
+            <select id="pieces"></select>
+          </div>
+          <div class="field">
+            <label for="orientation">White is at the</label>
+            <select id="orientation">
+              <option value="white">bottom</option>
+              <option value="black">top (flipped)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="show-names" checked> Show player names</label>
+          <label class="check"><input type="checkbox" id="show-caption" checked> Show the move text</label>
+          <label class="check"><input type="checkbox" id="show-quality"> Colour the move text by quality (needs an analysed game)</label>
+        </div>
+        <div class="field">
+          <label for="watermark">Watermark text (optional, for example your @handle)</label>
+          <input type="text" id="watermark" maxlength="40" autocomplete="off">
+        </div>
+        <div class="row">
+          <button type="button" id="make">Make it</button>
+          <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
+        </div>
+        <progress id="progress" max="100" value="0" hidden></progress>
+        <p id="status" class="hint" aria-live="polite"></p>
+        <p id="video-note" class="hint" hidden>Video is recorded in real time. Keep this tab open and visible until it finishes.</p>
+      </section>
+
+      <section class="panel studio-preview" aria-label="Preview and result">
+        <canvas id="preview" aria-label="Preview of the picture"></canvas>
+        <div id="result" class="result" hidden></div>
+        <p class="hint">Pieces: "cburnett" by Colin M.L. Burnett (GPLv2+). GIF encoding: gifenc (MIT).</p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="/js/export.js"></script>
+</body>
+</html>
